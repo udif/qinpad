@@ -1,4 +1,4 @@
-package us.chronovir.qinpad
+package com.udifink.qinpad
 
 import android.content.Context
 import android.inputmethodservice.InputMethodService
