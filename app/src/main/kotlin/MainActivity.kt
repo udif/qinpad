@@ -1,4 +1,4 @@
-package com.udifink.qinpad
+package com.udifink.qinhpad
 
 import android.content.Intent
 import android.provider.Settings

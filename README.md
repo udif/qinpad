@@ -1,7 +1,7 @@
 # QinPad - simple and lightweight keyboard app for Xiaomi Qin 1s and compatible keypad Android phones
 
 This project was originally developed by Luxferre at https://gitlab.com/suborg/qinpad
-It's original Android package name was `us.chronovir.qinpad` . I have modified it to `com.udifink.qinpad` so I could keep my unique version.
+It's original Android package name was `us.chronovir.qinpad` . I have modified it to `com.udifink.qinhpad` so I could keep my unique version.
 
 # Features
 
@@ -26,7 +26,7 @@ adb install [your_built_apk]
 To update the version, run:
 
 ```
-adb uninstall com.udifink.qinpad
+adb uninstall com.udifink.qinhpad
 adb install [your_new_apk]
 ```
 

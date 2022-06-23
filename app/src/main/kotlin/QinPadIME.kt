@@ -1,4 +1,4 @@
-package com.udifink.qinpad
+package com.udifink.qinhpad
 
 import android.content.Context
 import android.inputmethodservice.InputMethodService
@@ -26,17 +26,29 @@ class QinPadIME : InputMethodService() {
     private val layoutIconsNormal = arrayOf(R.drawable.ime_latin_normal, R.drawable.ime_cyrillic_normal)
     private val layoutIconsCaps = arrayOf(R.drawable.ime_latin_caps, R.drawable.ime_cyrillic_caps)
     private val layouts = arrayOf(
-        arrayOf( //latin
-            " +\n_$#()[]{}", ".,?!¿¡'\"1-~@/:\\", "abc2áäåāǎàçč",
-            "def3éēěè", "ghi4ģíīǐì", "jkl5ķļ",
-            "mno6ñņóõöøōǒò", "pqrs7ßš", "tuv8úüūǖǘǔǚùǜ",
-            "wxyz9ýž"
+        // We disable at the moment the cyrillic and eu keyboard until we set up a settings window
+        // to selectively enable/disable languages
+        //arrayOf( //cyrillic
+        //    " +\n_$#()[]{}", ".,?!'\"1-~@/:\\",
+        //    "абвг2ґ", "деёжз3є", "ийкл4ії",
+        //    "мноп5", "рсту6", "фхцч7", "шщъы8",
+        //    "ьэюя9"
+        //),
+        //arrayOf( //latin
+        //    " +\n_$#()[]{}", ".,?!¿¡'\"1-~@/:\\", "abc2áäåāǎàçč",
+        //    "def3éēěè", "ghi4ģíīǐì", "jkl5ķļ",
+        //    "mno6ñņóõöøōǒò", "pqrs7ßš", "tuv8úüūǖǘǔǚùǜ",
+        //    "wxyz9ýž"
+        //),
+        arrayOf( // Hebrew
+            " +\n_$#()[]{}", ".,?!¿¡'\"1-~@/:\\", "דהו2", "אבג3",
+            "םמןנ4", "יךכל5", "זחט6",
+            "רשת7",  "ץצק8",  "סעףפ9"
         ),
-        arrayOf( //cyrillic
-            " +\n_$#()[]{}", ".,?!'\"1-~@/:\\",
-            "абвг2ґ", "деёжз3є", "ийкл4ії",
-            "мноп5", "рсту6", "фхцч7", "шщъы8",
-            "ьэюя9"
+        arrayOf( //latin, ABC only
+            " +\n_$#()[]{}", ".,?!¿¡'\"1-~@/:\\", "abc2", "def3",
+            "ghi4", "jkl5", "mno6",
+            "pqrs7", "tuv8", "wxyz9"
         )
     )
     private var currentLayout: Array<String>? = null
