@@ -4,7 +4,6 @@ import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.text.InputType
-import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -21,10 +20,19 @@ class QinPadIME : InputMethodService() {
     private var lockFlag = 0 //input lock flag for long presses
     private var currentLayoutIndex = 0 //you can change the default here
     private val rotResetHandler = Handler()
+    private var imm: InputMethodManager? = null
 
     //layoutIconsNormal, layoutIconsCaps and layouts must match each other
-    private val layoutIconsNormal = arrayOf(R.drawable.ime_latin_normal, R.drawable.ime_cyrillic_normal)
-    private val layoutIconsCaps = arrayOf(R.drawable.ime_latin_caps, R.drawable.ime_cyrillic_caps)
+    private val layoutIcons = arrayOf(R.drawable.ime_latin_normal, R.drawable.ime_latin_caps, R.drawable.ime_hebrew_normal)
+    class LayoutType(
+        var Index:Int, // index into layouts. yes this is a hack, we'll fix it later
+        var Caps:Boolean // does this layout requires a CAPS mode
+    )
+    private val layoutTypes = arrayOf(
+        LayoutType(Index=1, Caps=false), // English, no caps
+        LayoutType(Index=1, Caps=true),  // English, caps
+        LayoutType(Index=0, Caps=false)  // Hebrew,  no caps
+    )
     private val layouts = arrayOf(
         // We disable at the moment the cyrillic and eu keyboard until we set up a settings window
         // to selectively enable/disable languages
@@ -53,6 +61,20 @@ class QinPadIME : InputMethodService() {
     )
     private var currentLayout: Array<String>? = null
 
+    // method checking if the Google voice input is installed and returning its Id
+    private fun voiceExists(imeManager: InputMethodManager): String? {
+        val list = imeManager.inputMethodList
+        for (el in list) {
+            // return the id of the Google voice input input method
+            // in this case "com.google.android.googlequicksearchbox"
+            val id = el.id
+            if (id.contains("com.google.android.voicesearch")) {
+                return id
+            }
+        }
+        return null
+    }
+
     private fun resetRotator() {
         rotIndex = 0
         rotationMode = false
@@ -60,9 +82,8 @@ class QinPadIME : InputMethodService() {
     }
 
     private fun updateCurrentStatusIcon() {
-        val icon = if(caps) layoutIconsCaps[currentLayoutIndex] else layoutIconsNormal[currentLayoutIndex]
         hideStatusIcon()
-        showStatusIcon(icon)
+        showStatusIcon( layoutIcons[currentLayoutIndex])
     }
 
     private fun kkToDigit(keyCode: Int): Int {
@@ -142,6 +163,19 @@ class QinPadIME : InputMethodService() {
 
     override fun onKeyLongPress(keyCode: Int, event: KeyEvent): Boolean {
         val digit = kkToDigit(keyCode)
+        if (keyCode == KeyEvent.KEYCODE_STAR) {
+            // Start voice input
+            // check if the  Google voice input exist first
+
+            // Start voice input
+            // check if the  Google voice input exist first
+            val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val voiceExists = voiceExists(imm)
+            if (voiceExists != null) {
+                switchInputMethod(voiceExists)
+            }
+
+        }
         if(digit > 9) {
             resetRotator()
             return false
@@ -184,23 +218,23 @@ class QinPadIME : InputMethodService() {
     }
 
     private fun nextLang() {
-        val maxInd = layouts.size - 1
+        val maxInd = layoutTypes.size - 1
         currentLayoutIndex++
         if(currentLayoutIndex > maxInd) currentLayoutIndex = 0
-        currentLayout = layouts[currentLayoutIndex]
+        currentLayout = layouts[layoutTypes[currentLayoutIndex].Index]
+        caps = layoutTypes[currentLayoutIndex].Caps
         updateCurrentStatusIcon()
         resetRotator()
     }
 
     private fun handleTextInput(digit: Int, star: Boolean, pound: Boolean): Boolean {
         if(star) {
-            caps = !caps
-            updateCurrentStatusIcon()
+            // Add here support for Google voice input
         } else if(pound) {
             nextLang()
         } else {
             var targetSequence: CharSequence
-            currentLayout = layouts[currentLayoutIndex]
+            currentLayout = layouts[layoutTypes[currentLayoutIndex].Index]
             val selection = currentLayout!![digit]
 
             rotResetHandler.removeCallbacksAndMessages(null)
