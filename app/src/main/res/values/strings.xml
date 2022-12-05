@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">QinHPad</string>
+    <string name="label_subtype_generic">%s</string>
 </resources>
