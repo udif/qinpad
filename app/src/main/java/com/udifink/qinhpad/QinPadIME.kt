@@ -9,6 +9,7 @@ import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.ResultReceiver
 import android.os.Bundle
+import android.os.Looper
 import android.text.InputType
 import android.util.Log
 import android.view.KeyEvent
@@ -34,7 +35,7 @@ class QinPadIME : InputMethodService() {
     private var rotIndex = 0
     private var lockFlag = 0 //input lock flag for long presses
     private var currentLayoutIndex = 0 //you can change the default here
-    private val rotResetHandler = Handler()
+    private val rotResetHandler = Handler(Looper.getMainLooper())
     private var imm: InputMethodManager? = null
 
     //layoutIconsNormal, layoutIconsCaps and layouts must match each other
@@ -88,7 +89,7 @@ class QinPadIME : InputMethodService() {
         val list = imeManager.inputMethodList
         subtype = imeManager.currentInputMethodSubtype
         Log.d(TAG, String.format("size=%d", list.size))
-        Log.d(TAG, subtype?.toString())
+        subtype?.let{Log.d(TAG, it.toString())}
         for (el in list)
             Log.d(TAG, String.format("SubtypeCount=%d Id=%s", el.subtypeCount, el.id))
         for (el in list) {
@@ -144,8 +145,9 @@ class QinPadIME : InputMethodService() {
             ic = this.currentInputConnection
             caps = false
             resetRotator()
-            val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+            //val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+            requestShowSelf(InputMethodManager.SHOW_IMPLICIT)
             updateCurrentStatusIcon()
         }
     }
@@ -203,7 +205,7 @@ class QinPadIME : InputMethodService() {
             if (/*requestCode == SPEECH_REQUEST_CODE && */ aResultCode == Activity.RESULT_OK) {
                 val spokenText: String? =
                     aResultData?.getStringArray(RecognizerIntent.EXTRA_RESULTS)?.get(0)//.let { results ->                    results[0]                }
-                Log.d(TAG, spokenText)
+                spokenText?.let{Log.d(TAG, spokenText)}
             }
             //ic!!.commitText(spokenText, 1) // position cursor right after the inserted text
         }
@@ -316,12 +318,11 @@ class QinPadIME : InputMethodService() {
 
     private fun handleBackspace(ev: KeyEvent): Boolean {
         resetRotator()
-        if(ic == null) {
+        if (ic == null) {
             requestHideSelf(0)
-            ic!!.sendKeyEvent(ev)
+            //ic!!.sendKeyEvent(ev)
             return false
-        }
-        if(ic!!.getTextBeforeCursor(1, 0).isEmpty()) {
+        } else if(ic!!.getTextBeforeCursor(1, 0)?.isEmpty() == true) {
             ic!!.sendKeyEvent(ev)
             requestHideSelf(0)
             ic!!.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK))
@@ -369,7 +370,7 @@ class QinPadIME : InputMethodService() {
             if(rotationMode)
                 ic!!.deleteSurroundingText(1, 0)
             if(caps)
-                targetSequence = targetSequence.toString().toUpperCase()
+                targetSequence = targetSequence.toString().uppercase()
             ic!!.commitText(targetSequence, 1)
         }
         return true
